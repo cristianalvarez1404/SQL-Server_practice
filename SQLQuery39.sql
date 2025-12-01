@@ -2,8 +2,9 @@ EXEC bronze.load_bronze;
 
 CREATE OR ALTER PROCEDURE bronze.load_bronze AS 
 BEGIN
-	DECLARE @start_time DATETIME, @end_time DATETIME
+	DECLARE @start_time DATETIME, @end_time DATETIME,@batch_start_time DATETIME, @batch_end_time DATETIME;
 	BEGIN TRY
+		SET @batch_start_time = GETDATE();
 		PRINT '======================================================';
 		PRINT 'Loading Bronze Layer';
 		PRINT '======================================================';
@@ -91,14 +92,20 @@ BEGIN
 			FIELDTERMINATOR = ',',
 			TABLOCK
 		);
+
+		SET @batch_start_time = GETDATE();
+		PRINT '========================================================='
+		PRINT 'Loading Bronze Layer is completed';
+		PRINT ' - Total Load Duration: ' + CAST(DATEDIFF(SECOND,@batch_start_time, @batch_end_time) AS NVARCHAR) + ' seconds';
+		PRINT '========================================================='
 	END TRY
 	BEGIN CATCH
-		PRINT '=========================================================';
-		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER';
+		PRINT '========================================================='
+		PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER'
 		PRINT 'ERROR Message' + ERROR_MESSAGE();
 		PRINT 'ERROR Message' + CAST(ERROR_NUMBER() AS NVARCHAR);
 		PRINT 'ERROR Message' + CAST(ERROR_STATE() AS NVARCHAR);
-		PRINT '=========================================================';
+		PRINT '========================================================='
 	END CATCH
 END
 
